@@ -40,6 +40,7 @@ Game does not crash, even during bad input, and all MVP is met.
 
 **Which stretch goals will you attempt?**
   - The priority queue should be pretty easy to implement
+  - Allow the user to choose a difficulty to play on
   - We will attempt to add timing the user so they feel rushed, and so they get varied rating, but this may be too difficult to implement.
 
 **what tests will you need?**
