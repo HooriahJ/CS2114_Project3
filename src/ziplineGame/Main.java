@@ -9,6 +9,7 @@ public class Main
         GameController controller = new GameController(queue, player);
         controller.startGame();
         MainGame game = new MainGame();
+        System.out.println("PAPA'S ZIPLINERIA");
         game.run(controller);
     }
 
