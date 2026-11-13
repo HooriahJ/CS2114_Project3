@@ -2,7 +2,7 @@
 
 # Model works
 **Run the model**
-- Run the test package to run all of our JUnit tests. All 25 JUnit tests should pass and test various behaviors including invalid values.
+- Run the test package to run all of our JUnit tests. All 28 JUnit tests should pass and test various behaviors including invalid values.
 
 **Run the view**
 - Run Main.java and the user should be able to see the basic rules, what and how to input, whether their inputs are valid or invalid, information about the rider at the top of the queue, and their rating.
