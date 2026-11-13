@@ -29,7 +29,7 @@ Game does not crash, even during bad input, and all MVP is met.
   - Yes, we didn't have to make any changes to our Model/View/Controller system.
 
 **What happened to your unknowns?**
-- We experimented and figured out how much rating a player should get for getting it right and wrong. There are still some unknowns because they are part of our stretch goals.
+- We experimented and figured out how much rating a player should get for getting it right and wrong. We figured out our unknowns for our MVP. There are still some unknowns because they are part of our stretch goals.
 
 **What doesn't work yet?**
 - `MainTest.java` is still a placeholder. view tests cover input handling, but not every menu action or display branch.
@@ -39,9 +39,9 @@ Game does not crash, even during bad input, and all MVP is met.
 - expand view coverage for the remaining menu actions and add a startup test for `Main`.
 
 **Which stretch goals will you attempt?**
-  - The priority queue should be pretty easy to implement. The priority queue would need `GameController.java` so that it could check if your choice is correct (correctChoice) with the priority queue and to help place things into the priority queue (getNewRider and generateRider), and `Rider.java` would need a new boolean in its constructor to indicate whether the rider is of priority queue or not. For example, Rider(String name, int height, String items, boolean priority).
-  - Allow the user to choose a difficulty to play on. This would also need` GameController.java` to change how much rating you get per correct rider and how much rating you lose per wrong rider (calculateRatingChange), and would also make it more difficult by adding more people to the ban list (our initial banned riders constructor will have more riders), and making the height closer to the minimum height (generateRider would generate heights closer to minimum height)
-  - We will attempt to add timing the user so they feel rushed, and so they get varied rating, but this may be too difficult to implement. `GameController.java` would need new methods to calculate how long it takes for the user to make a decision (something like a timeUser method), and calculateRatingChange would calculate the change in rating based on time, and whether you are correct. 
+  - The priority queue should be pretty easy to implement. The priority queue would need `GameController.java` so that it could check if your choice is correct (correctChoice) with the priority queue and to help place things into the priority queue (getNewRider and generateRider), and `Rider.java` would need a new boolean in its constructor to indicate whether the rider is of priority queue or not. For example, Rider(String name, int height, String items, boolean priority). Anything not named should not need to be changed.
+  - Allow the user to choose a difficulty to play on. This would also need` GameController.java` to change how much rating you get per correct rider and how much rating you lose per wrong rider (calculateRatingChange), and would also make it more difficult by adding more people to the ban list (our initial banned riders constructor will have more riders), and making the height closer to the minimum height (generateRider would generate heights closer to minimum height). Anything not named should not need to be changed.
+  - We will attempt to add timing the user so they feel rushed, and so they get varied rating, but this may be too difficult to implement. `GameController.java` would need new methods to calculate how long it takes for the user to make a decision (something like a timeUser method), and calculateRatingChange would calculate the change in rating based on time, and whether you are correct. Anything not named should not need to be changed.
 
 **What tests will you need?**
 - add view coverage for empty queues, item removal, and rejection. add tests for any stretch goals implemented later.
