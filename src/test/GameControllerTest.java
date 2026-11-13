@@ -125,4 +125,24 @@ public class GameControllerTest extends student.TestCase
         assertEquals("None", rider.getItems());
         assertFalse(game.removeRiderItems());
     }
+    public void testEmptyQueueRatingUnchanged()
+    {
+        assertFalse(game.calculateRatingChange(false));
+        assertFalse(game.calculateRatingChange(true));
+        assertEquals(5.0, game.getCurrentRating(), 0.01);
+    }
+    public void testBanMatchesByNameAndHeight()
+    {
+        game.addToBanList(new Rider("Zed Q", 100, "None"));
+        queue.enqueue(new Rider("Zed Q", 100, "None"));
+        assertFalse(game.correctChoice());
+    }
+    public void testProcessDecision()
+    {
+        assertFalse(game.processDecision(true));
+        queue.enqueue(new Rider("A B", 100, "None"));
+        assertTrue(game.processDecision(true));
+        assertEquals(10.0, game.getCurrentRating(), 0.01);
+        assertTrue(game.hasWaitingRider());
+    }
 }
