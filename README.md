@@ -1,11 +1,11 @@
 # Papa's Ziplineria
 
-# model and tests
+# Model and tests
 - import the project and the course `CS2-Support` project into the same eclipse workspace. `.classpath` depends on `CS2-Support` for `student.TestCase`.
 - run the classes in `src/test` as JUnit tests. `MainTest.java` is still a placeholder.
 - `MainGameTest` covers padded menu choices, invalid input, and end-of-input before and after a rider decision. tests restore the original input/output streams after each run.
 
-**run the game**
+**Run the game**
 - run `ziplineGame.Main` as a java application. use choices 1–8 to inspect or manage riders, and 9 to exit.
 - spaces around a menu choice are allowed. invalid choices show an error and return to the menu. end-of-input exits cleanly.
 - to compile and run from the repo root with a JDK installed:
@@ -31,11 +31,11 @@ Game does not crash, even during bad input, and all MVP is met.
 **What happened to your unknowns?**
 - We experimented and figured out how much rating a player should get for getting it right and wrong. There are still some unknowns because they are part of our stretch goals.
 
-**what doesn't work yet?**
+**What doesn't work yet?**
 - `MainTest.java` is still a placeholder. view tests cover input handling, but not every menu action or display branch.
   
 # Next steps
-**what is left to finish the MVP?**
+**What is left to finish the MVP?**
 - expand view coverage for the remaining menu actions and add a startup test for `Main`.
 
 **Which stretch goals will you attempt?**
@@ -43,7 +43,7 @@ Game does not crash, even during bad input, and all MVP is met.
   - Allow the user to choose a difficulty to play on
   - We will attempt to add timing the user so they feel rushed, and so they get varied rating, but this may be too difficult to implement.
 
-**what tests will you need?**
+**What tests will you need?**
 - add view coverage for empty queues, item removal, and rejection. add tests for any stretch goals implemented later.
 
 **Who does what?**
@@ -71,3 +71,6 @@ Division of work
 | RiderTest.java | Vincent | Wrote |
 | MainGameTest.java | Vincent | input regression tests: whitespace, invalid choices, and end-of-input |
 | Readme.md | Edward, Hooriah, Vihaan, Vincent | Wrote and revised different parts of Readme.md |
+
+# GenAI Note
+**GenAI was used to help write code, and verify that our test cases tested every case.**
