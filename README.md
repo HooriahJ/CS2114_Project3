@@ -1,11 +1,19 @@
 # Papa's Ziplineria
 
-# Model works
-**Run the model**
-- Run the test package to run all of our JUnit tests. All 28 JUnit tests should pass and test various behaviors including invalid values.
+# model and tests
+- import the project and the course `CS2-Support` project into the same eclipse workspace. `.classpath` depends on `CS2-Support` for `student.TestCase`.
+- run the classes in `src/test` as JUnit tests. `MainTest.java` is still a placeholder.
+- `MainGameTest` covers padded menu choices, invalid input, and end-of-input before and after a rider decision. tests restore the original input/output streams after each run.
 
-**Run the view**
-- Run Main.java and the user should be able to see the basic rules, what and how to input, whether their inputs are valid or invalid, information about the rider at the top of the queue, and their rating.
+**run the game**
+- run `ziplineGame.Main` as a java application. use choices 1–8 to inspect or manage riders, and 9 to exit.
+- spaces around a menu choice are allowed. invalid choices show an error and return to the menu. end-of-input exits cleanly.
+- to compile and run from the repo root with a JDK installed:
+
+```text
+javac -d bin src/ziplineGame/*.java
+java -cp bin ziplineGame.Main
+```
 # Thin or stubbed view
 Our game currently has a basic user interface that is able to tell the user what is happening.
 # Runs without crashing on the MVP path
@@ -23,26 +31,26 @@ Game does not crash, even during bad input, and all MVP is met.
 **What happened to your unknowns?**
 - We experimented and figured out how much rating a player should get for getting it right and wrong. There are still some unknowns because they are part of our stretch goals.
 
-**What doesn't work yet?**
-  - We are still missing test cases for our View.
+**what doesn't work yet?**
+- `MainTest.java` is still a placeholder. view tests cover input handling, but not every menu action or display branch.
   
 # Next steps
-**What is left to finish the MVP?**
-- Our MVP is actually almost already complete, just need to finish the test cases for the `View` and `bug fixes`
+**what is left to finish the MVP?**
+- expand view coverage for the remaining menu actions and add a startup test for `Main`.
 
 **Which stretch goals will you attempt?**
   - The priority queue should be pretty easy to implement
   - We will attempt to add timing the user so they feel rushed, and so they get varied rating, but this may be too difficult to implement.
 
-**What tests will you need?**
-- We will need tests for our `View` still and any stretch goals we add will also need tests.
+**what tests will you need?**
+- add view coverage for empty queues, item removal, and rejection. add tests for any stretch goals implemented later.
 
 **Who does what?**
 Division of Work
 
 | Class | Author |
 | --- | --- |
-| MainGameTest.java | Vihaan |
+| MainGameTest.java | Vihaan (remaining menu coverage), Vincent (input regression tests) |
 | MainTest.java | Hooriah |
 | PriorityQueue.java | Vincent & Edward |
 | Bug fixing & Connecting | Edward |
@@ -52,7 +60,7 @@ Division of work
 | Class | Author | Work |
 | --- | --- | --- |
 | GameController.java | Vihaan | Wrote |
-| MainGame.java | Vincent, Edward | Wrote, connect to GameController.java |
+| MainGame.java | Vincent, Edward | initial implementation and controller connection; Vincent: padded input and end-of-input fixes |
 | Player.java | Edward | Wrote |
 | Rider.java | Hooriah, Vincent | Wrote, connected to GameController.java and Rider.java |
 | Queue.java | Hooriah, Vincent | Wrote, connected to GameController.java and Rider.java |
@@ -60,6 +68,4 @@ Division of work
 | GameControllerTest.java | Vihaan | Wrote |
 | PlayerTest.java | Edward | Wrote |
 | RiderTest.java | Vincent | Wrote |
-
-# GenAI Note
-We used GenAI to make sure our test cases tests every possible case, and to assist with coding.
+| MainGameTest.java | Vincent | input regression tests: whitespace, invalid choices, and end-of-input |

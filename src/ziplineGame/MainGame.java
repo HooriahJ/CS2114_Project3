@@ -36,7 +36,13 @@ public class MainGame
             System.out.println("8. Get New Rider");
             System.out.println("9. Exit Game");
             System.out.print("\nEnter your choice:  ");
-            userInput = scanner.nextLine();
+            if (!scanner.hasNextLine())
+            {
+                isRunning = false;
+                System.out.println("Game exited. Thank you for playing!");
+                break;
+            }
+            userInput = scanner.nextLine().trim();
             System.out.println("---------------------------");
             if (controller.isValid(userInput) == false)
             {
