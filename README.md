@@ -70,3 +70,4 @@ Division of work
 | PlayerTest.java | Edward | Wrote |
 | RiderTest.java | Vincent | Wrote |
 | MainGameTest.java | Vincent | input regression tests: whitespace, invalid choices, and end-of-input |
+| Readme.md | Edward, Hooriah, Vihaan, Vincent | Wrote and revised different parts of Readme.md |
