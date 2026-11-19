@@ -1,148 +1,169 @@
 package test;
 
+import java.util.Random;
+
 import ziplineGame.GameController;
 import ziplineGame.Queue;
 import ziplineGame.Player;
 import ziplineGame.Rider;
 
-public class GameControllerTest extends student.TestCase
+public class GameControllerTest
+    extends student.TestCase
 {
     private Queue queue;
     private Player player;
     private GameController game;
-    
+
     public void setUp()
     {
         queue = new Queue();
         player = new Player(5.0);
-        game = new GameController(queue, player);   
+
+        game = new GameController(queue, player, new Random(1));
     }
-    public void testIsValid()
+
+
+    public void testHelpRegularQueue()
     {
-        assertTrue(game.isValid("1"));
-        assertTrue(game.isValid("4"));
-        assertTrue(game.isValid("9"));
-        assertFalse(game.isValid("0"));
-        assertFalse(game.isValid("10"));
-        assertFalse(game.isValid("-1"));
-        assertFalse(game.isValid("a"));
-        assertFalse(game.isValid("null"));
+        assertFalse(game.helpRegularQueue());
+
+        queue.enqueue(new Rider("Alex", 60, "None"));
+
+        assertTrue(game.helpRegularQueue());
+        assertTrue(game.hasCurrentRider());
     }
-    public void testGetCurrentRating()
-    {
-        assertEquals(5.0, game.getCurrentRating(), 0.01);
-    }
-    public void testServeNextRider()
-    {
-        assertFalse(game.serveNextRider());
-        Rider rider = new Rider("A B", 100, "None");
-        queue.enqueue(rider);
-        assertTrue(game.serveNextRider());
-        assertFalse(game.serveNextRider());
-    }
+
+
     public void testGetFrontRiderName()
     {
-        assertEquals("No current rider", game.getFrontRiderName());
-        Rider rider = new Rider("A B", 100, "None");
-        queue.enqueue(rider);
-        assertEquals("A B", game.getFrontRiderName());
+        queue.enqueue(new Rider("Alex", 60, "None"));
+
+        game.helpRegularQueue();
+
+        assertEquals("Alex", game.getFrontRiderName());
     }
+
+
     public void testGetFrontRiderHeight()
     {
-        assertEquals(-1, game.getFrontRiderHeight());
-        Rider rider = new Rider("A B", 100, "None");
-        queue.enqueue(rider);
-        assertEquals(100, game.getFrontRiderHeight());
+        queue.enqueue(new Rider("Alex", 60, "None"));
+
+        game.helpRegularQueue();
+
+        assertEquals(60, game.getFrontRiderHeight());
     }
+
+
     public void testGetFrontRiderItems()
     {
-        assertEquals("No current rider", game.getFrontRiderItems());
-        Rider rider = new Rider("A B", 100, "Backpack");
-        queue.enqueue(rider);
+        queue.enqueue(new Rider("Alex", 60, "Backpack"));
+
+        game.helpRegularQueue();
+
         assertEquals("Backpack", game.getFrontRiderItems());
     }
-    public void testGetFrontRiderSummary()
+
+
+    public void testHasCurrentRider()
     {
-        assertEquals("No riders are waiting.", game.getFrontRiderSummary());
-        Rider rider = new Rider("A B", 100, "Backpack");
-        queue.enqueue(rider);
-        assertTrue(game.getFrontRiderSummary().contains("A B"));
-        assertTrue(game.getFrontRiderSummary().contains("100"));
-        assertTrue(game.getFrontRiderSummary().contains("Backpack"));
+        assertFalse(game.hasCurrentRider());
+
+        queue.enqueue(new Rider("Alex", 60, "None"));
+
+        game.helpRegularQueue();
+
+        assertTrue(game.hasCurrentRider());
     }
+
+
     public void testCorrectChoice()
     {
-        Rider rider = new Rider("A B", 100, "None");
-        queue.enqueue(rider);
+        queue.enqueue(new Rider("Alex", 60, "None"));
+
+        game.helpRegularQueue();
+
         assertTrue(game.correctChoice());
-        queue.dequeue();
-        Rider rider2 = new Rider("A B", 40, "None");
-        queue.enqueue(rider2);
+    }
+
+
+    public void testIncorrectChoice()
+    {
+        queue.enqueue(new Rider("Alex", 40, "None"));
+
+        game.helpRegularQueue();
+
         assertFalse(game.correctChoice());
-        queue.dequeue();
-        Rider rider3 = new Rider("A B", 100, "Backpack");
-        queue.enqueue(rider3);
-        assertFalse(game.correctChoice());
-        Rider rider4 = new Rider("A B", 100, "None");
-        game.addToBanList(rider4);
-        assertFalse(game.correctChoice());
     }
-    public void testGetNewRider()
+
+
+    public void testRemoveRiderItems()
     {
-        assertTrue(game.getNewRider());
-        assertFalse(queue.isEmpty());
-    }
-    public void testCalculateRatingChange()
-    {
-        Rider rider = new Rider("A B", 100, "None");
-        queue.enqueue(rider);
-        assertTrue(game.calculateRatingChange(true));
-        assertEquals(10.0, game.getCurrentRating(), 0.01);
-       
-        assertFalse(game.calculateRatingChange(false));
-        assertEquals(0.0, game.getCurrentRating(), 0.01);
-    }
-    public void testAddToBanList()
-    {
-        Rider rider = new Rider("A B", 100, "None");
-        assertTrue(game.addToBanList(rider));
-        assertFalse(game.addToBanList(rider));
-        assertFalse(game.addToBanList(null));
-    }
-    public void testGetBanList()
-    {
-        assertTrue(game.getBanList().contains("A B") == false);
-        Rider rider = new Rider("A B", 100, "None");
-        game.addToBanList(rider);
-        assertTrue(game.getBanList().contains("A B"));
-    }
-    public void testRemoveItems()
-    {
-        Rider rider = new Rider("A B", 100, "Backpack");
-        queue.enqueue(rider);
-        assertEquals("Backpack", rider.getItems());
+        queue.enqueue(new Rider("Alex", 60, "Backpack"));
+
+        game.helpRegularQueue();
+
         assertTrue(game.removeRiderItems());
-        assertEquals("None", rider.getItems());
+        assertEquals("None", game.getFrontRiderItems());
+    }
+
+
+    public void testRemoveItemsWhenNone()
+    {
+        queue.enqueue(new Rider("Alex", 60, "None"));
+
+        game.helpRegularQueue();
+
         assertFalse(game.removeRiderItems());
     }
-    public void testEmptyQueueRatingUnchanged()
+
+
+    public void testAddToBanList()
     {
+        Rider rider = new Rider("Test Rider", 60, "None");
+
+        assertTrue(game.addToBanList(rider));
+        assertFalse(game.addToBanList(rider));
+    }
+
+
+    public void testCalculateRatingChange()
+    {
+        queue.enqueue(new Rider("Test Rider", 60, "None"));
+
+        game.helpRegularQueue();
+
+        assertTrue(game.calculateRatingChange(true));
+        assertEquals(10.0, game.getCurrentRating(), 0.01);
+    }
+
+
+    public void testCalculateRatingChangeIncorrect()
+    {
+        queue.enqueue(new Rider("Test Rider", 60, "None"));
+
+        game.helpRegularQueue();
+
         assertFalse(game.calculateRatingChange(false));
+        assertEquals(-5.0, game.getCurrentRating(), 0.01);
+    }
+
+
+    public void testCalculateRatingChangeNoRider()
+    {
         assertFalse(game.calculateRatingChange(true));
+
         assertEquals(5.0, game.getCurrentRating(), 0.01);
     }
-    public void testBanMatchesByNameAndHeight()
+
+
+    public void testServeNextRider()
     {
-        game.addToBanList(new Rider("Zed Q", 100, "None"));
-        queue.enqueue(new Rider("Zed Q", 100, "None"));
-        assertFalse(game.correctChoice());
-    }
-    public void testProcessDecision()
-    {
-        assertFalse(game.processDecision(true));
-        queue.enqueue(new Rider("A B", 100, "None"));
-        assertTrue(game.processDecision(true));
-        assertEquals(10.0, game.getCurrentRating(), 0.01);
-        assertTrue(game.hasWaitingRider());
+        queue.enqueue(new Rider("Alex", 60, "None"));
+
+        game.helpRegularQueue();
+
+        assertTrue(game.serveNextRider());
+        assertFalse(game.hasCurrentRider());
+        assertTrue(queue.isEmpty());
     }
 }

@@ -15,14 +15,19 @@ public class Rider
         this(name, height, items, false, false);
     }
 
-    public Rider(String name, int height, String items,
-        boolean hasPriority)
+
+    public Rider(String name, int height, String items, boolean hasPriority)
     {
         this(name, height, items, hasPriority, false);
     }
 
-    public Rider(String name, int height, String items,
-        boolean hasPriority, boolean fakePriorityPass)
+
+    public Rider(
+        String name,
+        int height,
+        String items,
+        boolean hasPriority,
+        boolean fakePriorityPass)
     {
         this.name = name;
         this.height = height;

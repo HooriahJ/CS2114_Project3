@@ -138,7 +138,8 @@ public class MainGame
                 {
                     if (!controller.hasCurrentRider())
                     {
-                        System.out.println("You are not currently helping a rider.");
+                        System.out
+                            .println("You are not currently helping a rider.");
                     }
                     else
                     {
@@ -146,11 +147,13 @@ public class MainGame
 
                         if (correct)
                         {
-                            System.out.println("You correctly accepted the rider!");
+                            System.out
+                                .println("You correctly accepted the rider!");
                         }
                         else
                         {
-                            System.out.println("You incorrectly accepted the rider.");
+                            System.out
+                                .println("You incorrectly accepted the rider.");
                         }
                     }
                 }
@@ -158,7 +161,8 @@ public class MainGame
                 {
                     if (!controller.hasCurrentRider())
                     {
-                        System.out.println("You are not currently helping a rider.");
+                        System.out
+                            .println("You are not currently helping a rider.");
                     }
                     else
                     {
@@ -166,11 +170,13 @@ public class MainGame
 
                         if (correct)
                         {
-                            System.out.println("You correctly rejected the rider!");
+                            System.out
+                                .println("You correctly rejected the rider!");
                         }
                         else
                         {
-                            System.out.println("You incorrectly rejected the rider.");
+                            System.out
+                                .println("You incorrectly rejected the rider.");
                         }
                     }
                 }
@@ -182,7 +188,8 @@ public class MainGame
                 else if (choice == 12)
                 {
                     System.out.println("Thank you for playing!");
-                    System.exit(0);
+                    isRunning = false;
+                    scanner.close();
                 }
             }
         }

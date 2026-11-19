@@ -574,47 +574,43 @@ public class GameController
 
         if (hasPriority)
         {
-            fakePriorityPass =
-                random.nextDouble() < FAKE_PRIORITY_PASS_CHANCE;
+            fakePriorityPass = random.nextDouble() < FAKE_PRIORITY_PASS_CHANCE;
         }
 
-        return new Rider(name, height, items, hasPriority,
-            fakePriorityPass);
+        return new Rider(name, height, items, hasPriority, fakePriorityPass);
     }
 
 
-
-public String verifyFrontPriority()
-{
-    if (currentRider == null)
+    public String verifyFrontPriority()
     {
-        return "No current rider.";
+        if (currentRider == null)
+        {
+            return "No current rider.";
+        }
+
+        if (!currentRiderIsPriority)
+        {
+            return "This person is not from the priority queue.";
+        }
+
+        if (!currentRider.hasPriority())
+        {
+            return "No priority pass.";
+        }
+
+        if (currentRider.hasFakePriorityPass())
+        {
+            return "Fake priority pass.";
+        }
+
+        if (currentRider.isPriorityVerified())
+        {
+            return "Priority pass was already verified.";
+        }
+
+        currentRider.verifyPriority();
+        return "Real priority pass verified.";
     }
-
-    if (!currentRiderIsPriority)
-    {
-        return "This person is not from the priority queue.";
-    }
-
-    if (!currentRider.hasPriority())
-    {
-        return "No priority pass.";
-    }
-
-    if (currentRider.hasFakePriorityPass())
-    {
-        return "Fake priority pass.";
-    }
-
-    if (currentRider.isPriorityVerified())
-    {
-        return "Priority pass already verified.";
-    }
-
-    currentRider.verifyPriority();
-    return "Priority pass verified.";
-}
-
 
 
     public boolean hasPriorityQueueRider()

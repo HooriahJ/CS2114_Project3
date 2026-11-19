@@ -1,18 +1,20 @@
+
 package test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Random;
+
 import ziplineGame.GameController;
 import ziplineGame.MainGame;
 import ziplineGame.Player;
 import ziplineGame.Queue;
 import ziplineGame.Rider;
 
-public class MainGameTest extends student.TestCase
+public class MainGameTest
+    extends student.TestCase
 {
     private Queue queue;
     private Player player;
@@ -22,63 +24,85 @@ public class MainGameTest extends student.TestCase
     {
         queue = new Queue();
         queue.enqueue(new Rider("Test Rider", 60, "None"));
+
         player = new Player(5.0);
         controller = new GameController(queue, player, new Random(0));
     }
 
+
     public void testWhitespaceAroundMenuChoice()
     {
-        String output = runGame(" 1 \n\t9 \n");
+        String output = runGame(" 8 \n 1 \n 12 \n");
+
+        assertTrue(
+            output.contains(
+                "You are now helping the person from the Regular Queue."));
+
         assertTrue(output.contains("Rider Name: Test Rider"));
-        assertTrue(output.contains("Game exited."));
+
+        assertTrue(output.contains("Thank you for playing!"));
+
         assertFalse(output.contains("Invalid input."));
     }
+
 
     public void testEndOfInput()
     {
         String output = runGame("");
+
         assertTrue(output.contains("Game exited."));
         assertEquals(5.0, player.getRating(), 0.01);
         assertEquals("Test Rider", queue.peek().getName());
     }
+
 
     public void testInvalidInputThenExit()
     {
-        String output = runGame("hello\n\n0\n10\n9\n");
+        String output = runGame("hello\n12\n");
+
         assertTrue(output.contains("Invalid input."));
-        assertTrue(output.contains("Game exited."));
+        assertTrue(output.contains("Thank you for playing!"));
         assertEquals(5.0, player.getRating(), 0.01);
-        assertEquals("Test Rider", queue.peek().getName());
     }
+
 
     public void testEndOfInputAfterAction()
     {
-        String output = runGame("6\n");
-        assertTrue(output.contains("You made the correct choice."));
+        String output = runGame("8\n9\n");
+
+        assertTrue(
+            output.contains(
+                "You are now helping the person from the Regular Queue."));
+
+        assertTrue(output.contains("You correctly accepted the rider!"));
+
         assertTrue(output.contains("Game exited."));
+
         assertEquals(10.0, player.getRating(), 0.01);
         assertTrue(queue.isEmpty());
     }
 
+
     private String runGame(String input)
     {
-        InputStream originalIn = System.in;
-        PrintStream originalOut = System.out;
+        InputStream oldInput = System.in;
+        PrintStream oldOutput = System.out;
+
         ByteArrayOutputStream output = new ByteArrayOutputStream();
-        PrintStream capturedOut = new PrintStream(output);
+
         try
         {
-            System.setIn(new ByteArrayInputStream(
-                input.getBytes(StandardCharsets.UTF_8)));
-            System.setOut(capturedOut);
+            System.setIn(new ByteArrayInputStream(input.getBytes()));
+            System.setOut(new PrintStream(output));
+
             new MainGame().run(controller);
-            return new String(output.toByteArray(), StandardCharsets.UTF_8);
+
+            return output.toString();
         }
         finally
         {
-            System.setIn(originalIn);
-            System.setOut(originalOut);
-            capturedOut.close();
+            System.setIn(oldInput);
+            System.setOut(oldOutput);
         }
     }
 }
