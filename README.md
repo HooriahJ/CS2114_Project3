@@ -6,7 +6,7 @@
 - `MainGameTest` covers padded menu choices, invalid input, and end-of-input before and after a rider decision. tests restore the original input/output streams after each run.
 
 **Run the game**
-- run `ziplineGame.Main` as a java application. use choices 1–8 to inspect or manage riders, and 9 to exit.
+- run `ziplineGame.Main` as a java application. use choices 1–11 to inspect or manage riders, and 12 to exit.
 - spaces around a menu choice are allowed. invalid choices show an error and return to the menu. end-of-input exits cleanly.
 - to compile and run from the repo root with a JDK installed:
 
@@ -14,50 +14,60 @@
 javac -d bin src/ziplineGame/*.java
 java -cp bin ziplineGame.Main
 ```
-# Thin or stubbed view
-Our game currently has a basic user interface that is able to tell the user what is happening.
-# Runs without crashing on the MVP path
-Game does not crash, even during bad input, and all MVP is met.
+# One non-trivial feature added
+
+We added a priority queue system. Riders can come from either the regular queue, or the priority queue. Riders from the priority queue must be served first, or else the player loses rating. Riders in the priority queue need to be verified that they have a priority pass to be allowed through the priority queue. If they do not, then they must be rejected.
+
+# JUnit tests that run
+
+We have 41 JUnit tests that pass.
+
+# Bad input survives
+
+Attempting to input "null" or anything that is not between 1-12 will tell the user their input was invalid, and to try again. Attempting to check information about a rider when there is no rider tells the user that there is no rider.
+
 # Reflection
-**What changed from your specification?**
-- We realized that we needed a Main file to run the game, so we made one. Group decision.
-- Added `getFrontRiderName`, `getFrontRiderHeight`, and `getFrontRiderItems` to `GameController.java` for ease of access. Without it, accessing this information is much more difficult. Group decision.
-- Added a 20% chance for riders to come back. This is so the banned list can have a function since previously riders would never come back and so nobody on the ban list would ever come. Group decision.
-- Added a initial list of banned riders. This is so the game doesn't start with a empty banned list. Group decision.
+**How did your design absorb the change?**
 
-**Did the model really stand alone?**
-  - Yes, we didn't have to make any changes to our Model/View/Controller system.
+We had to add `PriorityQueue.java` to handle priority queues, and we had to modify `GameController.java` to accomodate for `PriorityQueue.java`, and modify `Rider.java` for a boolean for if a rider is part of the priority queue or not. The only thing that we didn't write in Deliverable 3 that we did change for `PriorityQueue.java` is we had to also update `MainGame.java` (the view) so that the user could actually see the information about the priority queue.
 
-**What happened to your unknowns?**
-- We experimented and figured out how much rating a player should get for getting it right and wrong. We figured out our unknowns for our MVP. There are still some unknowns because they are part of our stretch goals.
+**Did the change cross the model/view line?**
+
+No, the change didn't have to cross the model/view line.
+
+**What changed from own Deliverable 3 plan?**
+
+We had to update `MainGame.java` to add `PriorityQueue.java` and some of our tests also had to be changed to accomodate for `PriorityQueue.java`. We planned to write `MainTest.java`, but for now it is still a placeholder. We also had some other potential ideas planned to be added like the timer, but we decided to push that off to the final product.
 
 **What doesn't work yet?**
-- `MainTest.java` is still a placeholder. view tests cover input handling, but not every menu action or display branch.
-  
-# Next steps
-**What is left to finish the MVP?**
-- expand view coverage for the remaining menu actions and add a startup test for `Main`.
 
-**Which stretch goals will you attempt?**
-  - The priority queue should be pretty easy to implement. The priority queue would need `GameController.java` so that it could check if your choice is correct (`correctChoice`) with the priority queue and to help place things into the priority queue (`getNewRider` and `generateRider`), and `Rider.java` would need a new boolean in its constructor to indicate whether the rider is of priority queue or not. For example, `Rider(String name, int height, String items, boolean priority)`. Anything not named should not need to be changed.
-  - Allow the user to choose a difficulty to play on. This would also need` GameController.java` to change how much rating you get per correct rider and how much rating you lose per wrong rider (`calculateRatingChange`), and would also make it more difficult by adding more people to the ban list (our initial banned riders constructor will have more riders), and making the height closer to the minimum height (`generateRider` would generate heights closer to minimum height). Anything not named should not need to be changed.
-  - We will attempt to add timing the user so they feel rushed, and so they get varied rating, but this may be too difficult to implement. `GameController.java` would need new methods to calculate how long it takes for the user to make a decision (something like a `timeUser` method), and `calculateRatingChange` would calculate the change in rating based on time, and whether you are correct. Anything not named should not need to be changed.
+`MainTest.java` currently is just a placeholder.
 
-**What tests will you need?**
-- add view coverage for empty queues, item removal, and rejection. add tests for any stretch goals implemented later.
+# Next Steps
+
+**What is left for the final build?**
+
+We need to double check to make sure all of our current code works as intended and our tests cases do not fail to catch any cases.
+
+**Which stretch goals are you committing to, and which are you dropping?**
+
+We will drop the timer idea and instead allow the user to choose a difficulty when starting the game.
+
+**What will your 3-minute demo show?**
+
+It will show the user getting a rider, and picking the wrong choice first to show that picking the wrong choice results in losing rating. Then, we will get another rider and make the correct choice to show that picking the correct choice results in gaining rating. Then, we will show bad input cases like attempting to put in negative numbers, things that aren't numbers, and null. After that, we will show our priority queue working as intended by intentionally ignoring the priority queue and showing that you lose rating for ignoring the priority queue. Then, we will play the game normally until we reach 25 rating.
 
 **Who does what?**
-Division of Work
 
-| Class | Author |
+| Item | Author |
 | --- | --- |
-| MainGameTest.java | Vihaan (remaining menu coverage), Vincent (input regression tests) |
-| MainTest.java | Hooriah |
-| PriorityQueue.java | Vincent & Edward |
-| Bug fixing & Connecting | Edward |
+| MainTest.java | Vihaan |
+| Difficulty | Hooriah |
+| Difficulty Test | Vincent |
+| Bugfixing | Edward |
 
 # Attribution
-Division of work
+Division of work (D3 & D4)
 | Class | Author | Work |
 | --- | --- | --- |
 | GameController.java | Vihaan | Wrote |
@@ -71,6 +81,8 @@ Division of work
 | RiderTest.java | Vincent | Wrote |
 | MainGameTest.java | Vincent | input regression tests: whitespace, invalid choices, and end-of-input |
 | Readme.md | Edward, Hooriah, Vihaan, Vincent | Wrote and revised different parts of Readme.md |
+| PriorityQueue.java | Vincent & Edward | Wrote |
+| PriorityQueueTest.java | Hooriah & Vihaan | Wrote |
 
 # GenAI Note
 **GenAI was used to help write code, and verify that our test cases tested every case.**
