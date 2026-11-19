@@ -7,11 +7,9 @@ import java.util.Random;
 /**
  * Controller for Papa's Ziplineria. Mediates between the view (MainGame) and
  * the model (Queue, Rider, Player). The view only ever talks to this class: it
- * sends in user choices and gets back Strings, ints and booleans to display.
- * It never receives a Queue or Player reference, so it cannot change the
- * model directly.
- *
- * The ban list lives here (not in the model) because it is a rule the
+ * sends in user choices and gets back Strings, ints and booleans to display. It
+ * never receives a Queue or Player reference, so it cannot change the model
+ * directly. The ban list lives here (not in the model) because it is a rule the
  * controller enforces while evaluating a decision, not state the view reads.
  */
 public class GameController
@@ -19,7 +17,9 @@ public class GameController
     // ----- Game rules / tuning values (one place to change them) -----
     /** Minimum height, in inches, to ride. Also shown in MainGame's rules. */
     public static final int MIN_HEIGHT = 48;
-    /** Items value meaning the rider carries nothing. Matches Rider's default. */
+    /**
+     * Items value meaning the rider carries nothing. Matches Rider's default.
+     */
     public static final String NO_ITEMS = "None";
     /** Rating gained for a correct accept/reject decision. */
     public static final double RATING_GAIN = 5.0;
@@ -30,8 +30,11 @@ public class GameController
     /** Number of riders pre-loaded onto the ban list. */
     public static final int STARTING_BANNED = 3;
     /** Number of options in MainGame's menu (valid choices are 1..this). */
-    public static final int MENU_OPTIONS = 9;
+    public static final int MENU_OPTIONS = 12;
 
+    public static final double PRIORITY_LINE_CHANCE = 0.4;
+    public static final double PRIORITY_PASS_CHANCE = 0.8;
+    public static final double FAKE_PRIORITY_PASS_CHANCE = 0.05;
     private static final int MIN_RANDOM_HEIGHT = 30;
     private static final int HEIGHT_RANGE = 50;
 
@@ -51,30 +54,31 @@ public class GameController
         "Wyatt", "Goldie", "Thomas", "Winter", "Isaac", "Arabella", "Josiah",
         "Anastasia", "Hugo", "Myla", "Arthur", "Leah" };
 
-    private static final String[] LAST_NAMES = { "Smith", "Johnson",
-        "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis",
-        "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson",
-        "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin", "Lee",
-        "Perez", "Thompson", "White", "Harris", "Sanchez", "Clark", "Ramirez",
-        "Lewis", "Robinson", "Walker", "Young", "Allen", "King", "Wright",
-        "Scott", "Torres", "Nguyen", "Hill", "Flores", "Green", "Adams",
-        "Nelson", "Baker", "Hall", "Rivera", "Campbell", "Mitchell", "Carter",
-        "Roberts", "Gomez", "Phillips", "Evans", "Turner", "Diaz", "Parker",
-        "Cruz", "Edwards", "Collins", "Reyes", "Stewart", "Morris", "Morales",
-        "Murphy", "Cook", "Rogers", "Gutierrez", "Ortiz", "Morgan", "Cooper",
-        "Peterson", "Bailey", "Reed", "Kelly", "Howard", "Ramos", "Kim", "Cox",
-        "Ward", "Richardson", "Watson", "Brooks", "Chavez", "Wood", "James",
-        "Bennett", "Gray", "Mendoza", "Ruiz", "Hughes", "Price", "Alvarez",
-        "Castillo", "Sanders", "Patel", "Myers", "Long", "Ross", "Foster",
-        "Jimenez" };
+    private static final String[] LAST_NAMES = { "Smith", "Johnson", "Williams",
+        "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez",
+        "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas",
+        "Taylor", "Moore", "Jackson", "Martin", "Lee", "Perez", "Thompson",
+        "White", "Harris", "Sanchez", "Clark", "Ramirez", "Lewis", "Robinson",
+        "Walker", "Young", "Allen", "King", "Wright", "Scott", "Torres",
+        "Nguyen", "Hill", "Flores", "Green", "Adams", "Nelson", "Baker", "Hall",
+        "Rivera", "Campbell", "Mitchell", "Carter", "Roberts", "Gomez",
+        "Phillips", "Evans", "Turner", "Diaz", "Parker", "Cruz", "Edwards",
+        "Collins", "Reyes", "Stewart", "Morris", "Morales", "Murphy", "Cook",
+        "Rogers", "Gutierrez", "Ortiz", "Morgan", "Cooper", "Peterson",
+        "Bailey", "Reed", "Kelly", "Howard", "Ramos", "Kim", "Cox", "Ward",
+        "Richardson", "Watson", "Brooks", "Chavez", "Wood", "James", "Bennett",
+        "Gray", "Mendoza", "Ruiz", "Hughes", "Price", "Alvarez", "Castillo",
+        "Sanders", "Patel", "Myers", "Long", "Ross", "Foster", "Jimenez" };
 
     // "None" appears several times so most riders carry nothing.
-    private static final String[] ITEMS = { NO_ITEMS, NO_ITEMS, NO_ITEMS,
-        NO_ITEMS, NO_ITEMS, "Food", "Drink", "Phone", "Keys",
-        "Wallet, Backpack" };
-
+    private static final String[] ITEMS =
+        { NO_ITEMS, NO_ITEMS, NO_ITEMS, NO_ITEMS, NO_ITEMS, "Food", "Drink",
+            "Phone", "Keys", "Wallet, Backpack" };
     // ----- Fields -----
     private Queue queue;
+    private PriorityQueue priorityQueue;
+    private Rider currentRider;
+    private boolean currentRiderIsPriority;
     private Player player;
     private ArrayList<Rider> banList;
     private ArrayList<Rider> previousRiders;
@@ -115,6 +119,9 @@ public class GameController
                 "queue, player and random must not be null");
         }
         this.queue = queue;
+        this.priorityQueue = new PriorityQueue();
+        this.currentRider = null;
+        this.currentRiderIsPriority = false;
         this.player = player;
         this.random = random;
         this.banList = new ArrayList<Rider>();
@@ -134,7 +141,8 @@ public class GameController
     // ----------------------------------------------------------
     /**
      * Put the first rider in line. Call once before the game loop so the player
-     * never starts at an empty line. Does nothing if someone is already waiting.
+     * never starts at an empty line. Does nothing if someone is already
+     * waiting.
      *
      * @return true if a rider is waiting afterwards
      */
@@ -182,28 +190,43 @@ public class GameController
      * remembered so they can return later.
      *
      * @return true if a rider was removed, false if the line was empty (the
-     *         rating is never touched here)
+     *             rating is never touched here)
      */
     public boolean serveNextRider()
     {
-        Rider rider = queue.peek();
-
-        if (rider == null)
+        if (currentRider == null)
         {
             return false;
         }
 
-        if (breaksRules(rider))
+        if (breaksRules(currentRider))
         {
-            addToBanList(rider);
+            addToBanList(currentRider);
         }
 
-        if (!previousRiders.contains(rider))
+        if (currentRiderIsPriority && !currentRider.hasPriority())
         {
-            previousRiders.add(rider);
+            addToBanList(currentRider);
         }
 
-        return queue.dequeue();
+        if (!previousRiders.contains(currentRider))
+        {
+            previousRiders.add(currentRider);
+        }
+
+        if (currentRiderIsPriority)
+        {
+            priorityQueue.dequeue();
+        }
+        else
+        {
+            queue.dequeue();
+        }
+
+        currentRider = null;
+        currentRiderIsPriority = false;
+
+        return true;
     }
 
 
@@ -213,7 +236,8 @@ public class GameController
      */
     public boolean hasWaitingRider()
     {
-        return queue.peek() != null;
+        return currentRider != null || !priorityQueue.isEmpty()
+            || !queue.isEmpty();
     }
 
 
@@ -233,14 +257,12 @@ public class GameController
      */
     public String getFrontRiderName()
     {
-        Rider rider = queue.peek();
-
-        if (rider == null)
+        if (currentRider == null)
         {
-            return "No current rider";
+            return "No rider selected.";
         }
 
-        return rider.getName();
+        return currentRider.getName();
     }
 
 
@@ -250,14 +272,12 @@ public class GameController
      */
     public int getFrontRiderHeight()
     {
-        Rider rider = queue.peek();
-
-        if (rider == null)
+        if (currentRider == null)
         {
-            return -1;
+            return 0;
         }
 
-        return rider.getHeight();
+        return currentRider.getHeight();
     }
 
 
@@ -267,33 +287,28 @@ public class GameController
      */
     public String getFrontRiderItems()
     {
-        Rider rider = queue.peek();
-
-        if (rider == null)
+        if (currentRider == null)
         {
-            return "No current rider";
+            return "No rider selected.";
         }
 
-        return rider.getItems();
+        return currentRider.getItems();
     }
 
 
     // ----------------------------------------------------------
     /**
-     * @return the front rider's name, height and items, or
-     *         "No riders are waiting."
+     * @return the front rider's name, height and items, or "No riders are
+     *             waiting."
      */
     public String getFrontRiderSummary()
     {
-        Rider rider = queue.peek();
-
-        if (rider == null)
+        if (currentRider == null)
         {
-            return "No riders are waiting.";
+            return "No rider is currently being helped.";
         }
 
-        return "Name: " + rider.getName() + ", Height: " + rider.getHeight()
-            + ", Items: " + rider.getItems();
+        return "Currently helping a rider.";
     }
 
 
@@ -303,18 +318,33 @@ public class GameController
      * carrying nothing.
      *
      * @return true if accepting is the correct choice; false if the rider
-     *         should be rejected or no one is waiting
+     *             should be rejected or no one is waiting
      */
     public boolean correctChoice()
     {
-        Rider rider = queue.peek();
-
-        if (rider == null)
+        if (currentRider == null)
         {
             return false;
         }
 
-        return !breaksRules(rider) && !isBanned(rider);
+        if (!isHelpingCorrectQueue())
+        {
+            return false;
+        }
+
+        if (breaksRules(currentRider) || isBanned(currentRider))
+        {
+            return false;
+        }
+
+        if (currentRiderIsPriority)
+        {
+            return currentRider.hasPriority()
+                && !currentRider.hasFakePriorityPass()
+                && currentRider.isPriorityVerified();
+        }
+
+        return true;
     }
 
 
@@ -328,13 +358,39 @@ public class GameController
      */
     public boolean getNewRider()
     {
+        Rider rider;
+
         if (!previousRiders.isEmpty() && random.nextDouble() < RETURN_CHANCE)
         {
             int index = random.nextInt(previousRiders.size());
-            return queue.enqueue(previousRiders.get(index));
+            rider = previousRiders.get(index);
+        }
+        else
+        {
+            rider = generateRider();
         }
 
-        return queue.enqueue(generateRider());
+        if (random.nextBoolean())
+        {
+            priorityQueue.enqueue(rider);
+        }
+        else
+        {
+            queue.enqueue(rider);
+        }
+
+        return true;
+    }
+
+
+    private Rider getNextRider()
+    {
+        if (!priorityQueue.isEmpty())
+        {
+            return priorityQueue.peek();
+        }
+
+        return queue.peek();
     }
 
 
@@ -348,19 +404,35 @@ public class GameController
      * @param accepted
      *            true if the player accepted the rider, false if rejected
      * @return true if the player's decision was correct; false if it was wrong
-     *         or if no rider was waiting (in which case the rating does not
-     *         change)
+     *             or if no rider was waiting (in which case the rating does not
+     *             change)
      */
     public boolean calculateRatingChange(boolean accepted)
     {
-        if (!hasWaitingRider())
+        if (currentRider == null)
         {
             return false;
         }
 
-        boolean correctDecision = (accepted == correctChoice());
-        double change = correctDecision ? RATING_GAIN : -RATING_LOSS;
-        player.setRating(player.getRating() + change);
+        boolean correctDecision;
+
+        if (!isHelpingCorrectQueue())
+        {
+            correctDecision = false;
+        }
+        else
+        {
+            correctDecision = (accepted == correctChoice());
+        }
+
+        if (correctDecision)
+        {
+            player.setRating(player.getRating() + RATING_GAIN);
+        }
+        else
+        {
+            player.setRating(player.getRating() - RATING_LOSS);
+        }
 
         return correctDecision;
     }
@@ -375,18 +447,19 @@ public class GameController
      * @param accepted
      *            true if the player accepted the rider, false if rejected
      * @return true if the decision was correct; false if wrong or no rider was
-     *         waiting (nothing changes in that case)
+     *             waiting (nothing changes in that case)
      */
-    public boolean processDecision(boolean accepted)
+    public boolean processDecision(boolean accept)
     {
-        if (!hasWaitingRider())
+        if (currentRider == null)
         {
             return false;
         }
 
-        boolean correct = calculateRatingChange(accepted);
+        boolean correct = calculateRatingChange(accept);
+
         serveNextRider();
-        getNewRider();
+
         return correct;
     }
 
@@ -437,22 +510,26 @@ public class GameController
      * Takes away the front rider's items.
      *
      * @return true if items were removed; false if no one is waiting or the
-     *         rider has no items
+     *             rider has no items
      */
     public boolean removeRiderItems()
     {
-        Rider rider = queue.peek();
-
-        if (rider == null || rider.getItems().equals(NO_ITEMS))
+        if (currentRider == null)
         {
             return false;
         }
 
-        return rider.setItems(NO_ITEMS);
+        if (currentRider.getItems().equals(NO_ITEMS))
+        {
+            return false;
+        }
+
+        currentRider.setItems(NO_ITEMS);
+        return true;
     }
 
-
     // ----- Private helpers -----
+
 
     /** True if the rider is too short or still carrying items. */
     private boolean breaksRules(Rider rider)
@@ -486,8 +563,144 @@ public class GameController
     {
         String name = FIRST_NAMES[random.nextInt(FIRST_NAMES.length)] + " "
             + LAST_NAMES[random.nextInt(LAST_NAMES.length)];
+
         int height = random.nextInt(HEIGHT_RANGE) + MIN_RANDOM_HEIGHT;
+
         String items = ITEMS[random.nextInt(ITEMS.length)];
-        return new Rider(name, height, items);
+
+        boolean hasPriority = random.nextDouble() < PRIORITY_PASS_CHANCE;
+
+        boolean fakePriorityPass = false;
+
+        if (hasPriority)
+        {
+            fakePriorityPass =
+                random.nextDouble() < FAKE_PRIORITY_PASS_CHANCE;
+        }
+
+        return new Rider(name, height, items, hasPriority,
+            fakePriorityPass);
+    }
+
+
+
+public String verifyFrontPriority()
+{
+    if (currentRider == null)
+    {
+        return "No current rider.";
+    }
+
+    if (!currentRiderIsPriority)
+    {
+        return "This person is not from the priority queue.";
+    }
+
+    if (!currentRider.hasPriority())
+    {
+        return "No priority pass.";
+    }
+
+    if (currentRider.hasFakePriorityPass())
+    {
+        return "Fake priority pass.";
+    }
+
+    if (currentRider.isPriorityVerified())
+    {
+        return "Priority pass already verified.";
+    }
+
+    currentRider.verifyPriority();
+    return "Priority pass verified.";
+}
+
+
+
+    public boolean hasPriorityQueueRider()
+    {
+        return !priorityQueue.isEmpty();
+    }
+
+
+    public boolean isFrontPriorityVerified()
+    {
+        if (priorityQueue.isEmpty())
+        {
+            return false;
+        }
+
+        return priorityQueue.peek().isPriorityVerified();
+    }
+
+
+    public String getPriorityQueueSummary()
+    {
+        return priorityQueue.toString();
+    }
+
+
+    public boolean frontRiderHasPriority()
+    {
+        if (priorityQueue.isEmpty())
+        {
+            return false;
+        }
+
+        return priorityQueue.peek().hasPriority();
+    }
+
+
+    public boolean hasRegularQueueRider()
+    {
+        return !queue.isEmpty();
+    }
+
+
+    public boolean helpPriorityQueue()
+    {
+        if (priorityQueue.isEmpty())
+        {
+            return false;
+        }
+
+        currentRider = priorityQueue.peek();
+        currentRiderIsPriority = true;
+
+        return true;
+    }
+
+
+    public boolean helpRegularQueue()
+    {
+        if (queue.isEmpty())
+        {
+            return false;
+        }
+
+        currentRider = queue.peek();
+        currentRiderIsPriority = false;
+
+        return true;
+    }
+
+
+    public boolean isHelpingCorrectQueue()
+    {
+        if (currentRider == null)
+        {
+            return false;
+        }
+
+        if (currentRiderIsPriority)
+        {
+            return true;
+        }
+
+        return priorityQueue.isEmpty();
+    }
+    public boolean hasCurrentRider()
+    {
+        return currentRider != null;
     }
 }

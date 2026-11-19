@@ -1,27 +1,32 @@
+
 package ziplineGame;
 
-// -------------------------------------------------------------------------
-/**
- * Rider class
- */
 public class Rider
 {
     private final String name;
     private final int height;
     private String items;
+    private boolean hasPriority;
+    private boolean fakePriorityPass;
+    private boolean priorityVerified;
 
-    // ----------------------------------------------------------
-    /**
-     * Create a new Rider object.
-     * 
-     * @param name
-     * @param height
-     * @param items
-     */
     public Rider(String name, int height, String items)
+    {
+        this(name, height, items, false, false);
+    }
+
+    public Rider(String name, int height, String items,
+        boolean hasPriority)
+    {
+        this(name, height, items, hasPriority, false);
+    }
+
+    public Rider(String name, int height, String items,
+        boolean hasPriority, boolean fakePriorityPass)
     {
         this.name = name;
         this.height = height;
+
         if (items == null || items.equals(""))
         {
             this.items = "None";
@@ -30,60 +35,61 @@ public class Rider
         {
             this.items = items;
         }
+
+        this.hasPriority = hasPriority;
+        this.fakePriorityPass = fakePriorityPass;
+        this.priorityVerified = false;
     }
 
-
-    // ----------------------------------------------------------
-    /**
-     * Get name of rider
-     * 
-     * @return name
-     */
     public String getName()
     {
         return name;
     }
 
-
-    // ----------------------------------------------------------
-    /**
-     * Get height of rider
-     * 
-     * @return height
-     */
     public int getHeight()
     {
         return height;
     }
 
-
-    // ----------------------------------------------------------
-    /**
-     * Get items of rider
-     * 
-     * @return items
-     */
     public String getItems()
     {
         return items;
     }
 
-
-    // ----------------------------------------------------------
-    /**
-     * Sets the riders items
-     * 
-     * @param changeItems
-     *            items to change to
-     * @return false if null or empty String, true otherwise
-     */
     public boolean setItems(String changeItems)
     {
         if (changeItems == null || changeItems.equals(""))
         {
             return false;
         }
+
         items = changeItems;
+        return true;
+    }
+
+    public boolean hasPriority()
+    {
+        return hasPriority;
+    }
+
+    public boolean hasFakePriorityPass()
+    {
+        return fakePriorityPass;
+    }
+
+    public boolean isPriorityVerified()
+    {
+        return priorityVerified;
+    }
+
+    public boolean verifyPriority()
+    {
+        if (!hasPriority || fakePriorityPass)
+        {
+            return false;
+        }
+
+        priorityVerified = true;
         return true;
     }
 }
