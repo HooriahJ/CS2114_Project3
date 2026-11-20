@@ -54,4 +54,26 @@ public class PlayerTest
         assertTrue(player.setRating(5.0));
         assertEquals(5.0, player.getRating(), 0.01);
     }
+
+    /** Invalid numeric values must not poison later score calculations. */
+    public void testNonFiniteRatingRejected()
+    {
+        double[] invalid = { Double.NaN, Double.POSITIVE_INFINITY,
+            Double.NEGATIVE_INFINITY };
+        for (double value : invalid)
+        {
+            assertFalse(player.setRating(value));
+            assertEquals(5.0, player.getRating(), 0.01);
+            try
+            {
+                new Player(value);
+                fail("Expected a finite starting rating");
+            }
+            catch (IllegalArgumentException expected)
+            {
+                // Expected validation failure.
+            }
+        }
+    }
+
 }

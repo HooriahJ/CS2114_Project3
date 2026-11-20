@@ -77,4 +77,48 @@ public class RiderTest
         assertFalse(fakeRider.verifyPriority());
         assertFalse(fakeRider.isPriorityVerified());
     }
+
+    /** Whitespace cannot replace an existing item description. */
+    public void testBlankItemsRejected()
+    {
+        assertFalse(rider.setItems("   "));
+        assertEquals("Backpack", rider.getItems());
+        assertEquals("None", new Rider("Sam", 60, "   ").getItems());
+    }
+
+    /** Invalid identity values are rejected before they enter a queue. */
+    public void testInvalidIdentity()
+    {
+        assertInvalidRider(null, 60);
+        assertInvalidRider("", 60);
+        assertInvalidRider("   ", 60);
+        assertInvalidRider("Alex", -1);
+        assertInvalidRider("Alex", 0);
+    }
+
+    /** Missing and forged passes cannot become verified. */
+    public void testMissingPassCannotBeVerified()
+    {
+        assertFalse(rider.verifyPriority());
+        assertFalse(rider.isPriorityVerified());
+        assertFalse(rider.hasFakePriorityPass());
+        Rider valid = new Rider("Valid", 60, "None", true);
+        assertTrue(valid.verifyPriority());
+        assertTrue(valid.verifyPriority());
+        assertTrue(valid.isPriorityVerified());
+    }
+
+    private void assertInvalidRider(String name, int height)
+    {
+        try
+        {
+            new Rider(name, height, "None");
+            fail("Expected an invalid identity to be rejected");
+        }
+        catch (IllegalArgumentException expected)
+        {
+            // Expected validation failure.
+        }
+    }
+
 }

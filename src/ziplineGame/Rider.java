@@ -1,6 +1,7 @@
 
 package ziplineGame;
 
+/** A rider identity with mutable items and per-visit pass verification. */
 public class Rider
 {
     private final String name;
@@ -22,6 +23,15 @@ public class Rider
     }
 
 
+    /**
+     * Creates a new visit with an initially unverified pass.
+     * @param name nonblank rider name
+     * @param height positive height in inches
+     * @param items items carried; null or blank means none
+     * @param hasPriority whether the rider carries a priority pass
+     * @param fakePriorityPass whether that pass is forged
+     * @throws IllegalArgumentException for an invalid name or height
+     */
     public Rider(
         String name,
         int height,
@@ -29,10 +39,15 @@ public class Rider
         boolean hasPriority,
         boolean fakePriorityPass)
     {
+        if (name == null || name.trim().isEmpty() || height <= 0)
+        {
+            throw new IllegalArgumentException(
+                "riders need a nonblank name and positive height");
+        }
         this.name = name;
         this.height = height;
 
-        if (items == null || items.equals(""))
+        if (items == null || items.trim().isEmpty())
         {
             this.items = "None";
         }
@@ -61,9 +76,14 @@ public class Rider
         return items;
     }
 
+    /**
+     * Changes carried items without changing rider identity or verification.
+     * @param changeItems nonblank description, or "None" for no items
+     * @return false for null/blank input, leaving existing items unchanged
+     */
     public boolean setItems(String changeItems)
     {
-        if (changeItems == null || changeItems.equals(""))
+        if (changeItems == null || changeItems.trim().isEmpty())
         {
             return false;
         }

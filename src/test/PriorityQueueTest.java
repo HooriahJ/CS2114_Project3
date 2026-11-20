@@ -53,4 +53,30 @@ public class PriorityQueueTest
         queue.dequeue();
         assertTrue(queue.isEmpty());
     }
+
+    /** Interleaved insertions, emptying, and reuse retain FIFO order. */
+    public void testInterleavedOrderAndReuse()
+    {
+        Rider a = new Rider("First", 60, "None");
+        Rider b = new Rider("Second", 60, "None");
+        Rider c = new Rider("Third", 60, "None");
+        queue.enqueue(a);
+        queue.enqueue(b);
+        assertSame(a, queue.peek());
+        assertFalse(queue.enqueue(null));
+        assertSame(a, queue.peek());
+        queue.dequeue();
+        queue.enqueue(c);
+        assertSame(b, queue.peek());
+        queue.dequeue();
+        assertSame(c, queue.peek());
+        queue.dequeue();
+        assertNull(queue.peek());
+        assertFalse(queue.dequeue());
+        queue.enqueue(a);
+        assertSame(a, queue.peek());
+        queue.dequeue();
+        assertTrue(queue.isEmpty());
+    }
+
 }

@@ -79,6 +79,7 @@ public class GameController
     private PriorityQueue priorityQueue;
     private Rider currentRider;
     private boolean currentRiderIsPriority;
+    private boolean decisionScored;
     private Player player;
     private ArrayList<Rider> banList;
     private ArrayList<Rider> previousRiders;
@@ -113,13 +114,31 @@ public class GameController
      */
     public GameController(Queue queue, Player player, Random random)
     {
-        if (queue == null || player == null || random == null)
+        this(queue, new PriorityQueue(), player, random);
+    }
+
+
+    /**
+     * Creates a game with supplied lines, for fixed scenarios and repeatable demos.
+     * Existing riders stay in their original FIFO order.
+     *
+     * @param queue regular waiting line
+     * @param priorityQueue priority waiting line
+     * @param player player whose rating is tracked
+     * @param random random source for future arrivals
+     * @throws IllegalArgumentException if any collaborator is null
+     */
+    public GameController(Queue queue, PriorityQueue priorityQueue,
+        Player player, Random random)
+    {
+        if (queue == null || priorityQueue == null || player == null
+            || random == null)
         {
             throw new IllegalArgumentException(
-                "queue, player and random must not be null");
+                "queues, player and random must not be null");
         }
         this.queue = queue;
-        this.priorityQueue = new PriorityQueue();
+        this.priorityQueue = priorityQueue;
         this.currentRider = null;
         this.currentRiderIsPriority = false;
         this.player = player;
@@ -148,7 +167,7 @@ public class GameController
      */
     public boolean startGame()
     {
-        if (queue.isEmpty())
+        if (!hasWaitingRider())
         {
             return getNewRider();
         }
@@ -204,7 +223,8 @@ public class GameController
             addToBanList(currentRider);
         }
 
-        if (currentRiderIsPriority && !currentRider.hasPriority())
+        if (currentRiderIsPriority && (!currentRider.hasPriority()
+            || currentRider.hasFakePriorityPass()))
         {
             addToBanList(currentRider);
         }
@@ -225,6 +245,7 @@ public class GameController
 
         currentRider = null;
         currentRiderIsPriority = false;
+        decisionScored = false;
 
         return true;
     }
@@ -268,7 +289,7 @@ public class GameController
 
     // ----------------------------------------------------------
     /**
-     * @return the front rider's height in inches, or -1 if no one is waiting
+     * @return the front rider's height in inches, or 0 if no rider is selected
      */
     public int getFrontRiderHeight()
     {
@@ -363,7 +384,11 @@ public class GameController
         if (!previousRiders.isEmpty() && random.nextDouble() < RETURN_CHANCE)
         {
             int index = random.nextInt(previousRiders.size());
-            rider = previousRiders.get(index);
+            Rider previous = previousRiders.get(index);
+            // Each visit owns its items and verification state independently.
+            rider = new Rider(previous.getName(), previous.getHeight(),
+                previous.getItems(), previous.hasPriority(),
+                previous.hasFakePriorityPass());
         }
         else
         {
@@ -398,22 +423,22 @@ public class GameController
     /**
      * Applies the rating consequence of the player's decision on the front
      * rider: +RATING_GAIN if it matches correctChoice(), -RATING_LOSS if not.
-     * Must be called BEFORE serveNextRider(), since it judges the rider at the
-     * front. (processDecision does both in the right order.)
+     * Scores a selected rider only once. Call before serveNextRider(), since
+     * it judges the selected rider. processDecision does both in order.
      *
      * @param accepted
      *            true if the player accepted the rider, false if rejected
      * @return true if the player's decision was correct; false if it was wrong
-     *             or if no rider was waiting (in which case the rating does not
-     *             change)
+     *             or if no unscored rider was selected (no rating change)
      */
     public boolean calculateRatingChange(boolean accepted)
     {
-        if (currentRider == null)
+        if (currentRider == null || decisionScored)
         {
             return false;
         }
 
+        decisionScored = true;
         boolean correctDecision;
 
         if (!isHelpingCorrectQueue())
@@ -441,10 +466,10 @@ public class GameController
     // ----------------------------------------------------------
     /**
      * One full turn: judge the decision, update the rating, remove the front
-     * rider, and feed a fresh rider into the line. The view calls only this, so
+     * rider, without adding another arrival. The view calls only this, so
      * it cannot get the order of those steps wrong.
      *
-     * @param accepted
+     * @param accept
      *            true if the player accepted the rider, false if rejected
      * @return true if the decision was correct; false if wrong or no rider was
      *             waiting (nothing changes in that case)
@@ -581,6 +606,10 @@ public class GameController
     }
 
 
+    /**
+     * Checks the selected priority rider without removing them.
+     * @return feedback describing a missing, fake, or verified pass
+     */
     public String verifyFrontPriority()
     {
         if (currentRider == null)
@@ -613,12 +642,18 @@ public class GameController
     }
 
 
+    /**
+     * @return whether anyone is waiting in the priority line
+     */
     public boolean hasPriorityQueueRider()
     {
         return !priorityQueue.isEmpty();
     }
 
 
+    /**
+     * @return whether the first priority-line rider has been verified
+     */
     public boolean isFrontPriorityVerified()
     {
         if (priorityQueue.isEmpty())
@@ -630,12 +665,18 @@ public class GameController
     }
 
 
+    /**
+     * @return a printable description of priority-line availability
+     */
     public String getPriorityQueueSummary()
     {
         return priorityQueue.toString();
     }
 
 
+    /**
+     * @return whether the first priority-line rider holds a pass
+     */
     public boolean frontRiderHasPriority()
     {
         if (priorityQueue.isEmpty())
@@ -647,15 +688,22 @@ public class GameController
     }
 
 
+    /**
+     * @return whether anyone is waiting in the regular line
+     */
     public boolean hasRegularQueueRider()
     {
         return !queue.isEmpty();
     }
 
 
+    /**
+     * Selects the first priority rider without removing them.
+     * @return false if empty or a scored rider still needs removal
+     */
     public boolean helpPriorityQueue()
     {
-        if (priorityQueue.isEmpty())
+        if (priorityQueue.isEmpty() || decisionScored)
         {
             return false;
         }
@@ -667,9 +715,13 @@ public class GameController
     }
 
 
+    /**
+     * Selects the first regular rider without removing them.
+     * @return false if empty or a scored rider still needs removal
+     */
     public boolean helpRegularQueue()
     {
-        if (queue.isEmpty())
+        if (queue.isEmpty() || decisionScored)
         {
             return false;
         }
@@ -681,6 +733,9 @@ public class GameController
     }
 
 
+    /**
+     * @return whether the selected rider obeys priority-first order
+     */
     public boolean isHelpingCorrectQueue()
     {
         if (currentRider == null)
@@ -695,6 +750,9 @@ public class GameController
 
         return priorityQueue.isEmpty();
     }
+    /**
+     * @return whether a rider is selected for inspection or a decision
+     */
     public boolean hasCurrentRider()
     {
         return currentRider != null;

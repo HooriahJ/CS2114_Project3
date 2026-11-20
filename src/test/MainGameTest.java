@@ -105,4 +105,46 @@ public class MainGameTest
             System.setOut(oldOutput);
         }
     }
+
+    /** Every invalid input from the scope is recoverable without scoring. */
+    public void testAllMalformedMenuInputs()
+    {
+        String output = runGame("\n   \n-1\n0\n13\n1.5\nnull\n999999999999999999999\n12\n");
+        assertEquals(8, output.split("Invalid input\\.", -1).length - 1);
+        assertTrue(output.contains("Thank you for playing!"));
+        assertEquals(5.0, player.getRating(), 0.01);
+        assertEquals("Test Rider", queue.peek().getName());
+    }
+
+    /** Inspection and decision commands survive without a selected rider. */
+    public void testCommandsWithoutSelection()
+    {
+        String output = runGame("1\n2\n3\n4\n5\n6\n7\n9\n10\n12\n");
+        assertTrue(output.contains("No current rider."));
+        assertTrue(output.contains("You are not currently helping a rider."));
+        assertEquals(5.0, player.getRating(), 0.01);
+        assertEquals("Test Rider", queue.peek().getName());
+    }
+
+    /** Console item removal uses the model before evaluating acceptance. */
+    public void testRemoveItemsAndAccept()
+    {
+        queue.peek().setItems("Phone");
+        String output = runGame("8\n3\n4\n4\n9\n12\n");
+        assertTrue(output.contains("Rider Items: Phone"));
+        assertTrue(output.contains("You removed the rider's items."));
+        assertTrue(output.contains("They have no items."));
+        assertTrue(output.contains("You correctly accepted the rider!"));
+        assertEquals(10.0, player.getRating(), 0.01);
+        assertTrue(queue.isEmpty());
+    }
+
+    /** Rejecting an eligible rider is penalized through the console path. */
+    public void testRejectEligibleRider()
+    {
+        String output = runGame("8\n10\n12\n");
+        assertTrue(output.contains("You incorrectly rejected the rider."));
+        assertEquals(-5.0, player.getRating(), 0.01);
+        assertTrue(queue.isEmpty());
+    }
 }

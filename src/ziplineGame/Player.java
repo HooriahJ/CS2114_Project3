@@ -12,10 +12,15 @@ public class Player
     /**
      * Create a new Player object.
      * 
-     * @param rating
+     * @param rating finite initial rating; negative values are allowed
+     * @throws IllegalArgumentException if rating is NaN or infinite
      */
     public Player(double rating)
     {
+        if (Double.isNaN(rating) || Double.isInfinite(rating))
+        {
+            throw new IllegalArgumentException("rating must be finite");
+        }
         this.rating = rating;
     }
 
@@ -36,11 +41,15 @@ public class Player
     /**
      * Sets rating of player
      * 
-     * @param changeRating
-     * @return true if successful
+     * @param changeRating requested finite rating
+     * @return true if updated, false for NaN or infinity (no change)
      */
     public boolean setRating(double changeRating)
     {
+        if (Double.isNaN(changeRating) || Double.isInfinite(changeRating))
+        {
+            return false;
+        }
         rating = changeRating;
         return true;
     }
