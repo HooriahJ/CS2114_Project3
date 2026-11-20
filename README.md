@@ -151,3 +151,7 @@ Division of work across D3 and D4. Earlier authors remain credited; the added D4
 | `PriorityQueueTest.java` | Hooriah, Vihaan, Vincent | Earlier priority queue tests; Vincent: interleaved FIFO, null-enqueue preservation, emptying, and reuse coverage |
 
 Vincent also added `scripts/test.sh` and updated the run instructions, test summary, reflection, and demo plan in this README.
+
+## GenAI Note
+
+**GenAI was used to help write code, and verify that our test cases tested every case.**
