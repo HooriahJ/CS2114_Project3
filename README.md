@@ -55,7 +55,7 @@ We will drop the timer idea and instead allow the user to choose a difficulty wh
 
 **What will your 3-minute demo show?**
 
-It will show the user getting a rider, and picking the wrong choice first to show that picking the wrong choice results in losing rating. Then, we will get another rider and make the correct choice to show that picking the correct choice results in gaining rating. Then, we will show bad input cases like attempting to put in negative numbers, things that aren't numbers, and null. After that, we will show our priority queue working as intended by intentionally ignoring the priority queue and showing that you lose rating for ignoring the priority queue. Then, we will play the game normally until we reach 25 rating.
+It will show the user getting a rider, and picking the wrong choice first to show that picking the wrong choice results in losing rating. Then, we will get another rider and make the correct choice to show that picking the correct choice results in gaining rating. Then, we will show bad input cases like attempting to put in negative numbers, things that aren't numbers, and null. After that, we will show our priority queue working as intended by intentionally ignoring the priority queue and showing that you lose rating for ignoring the priority queue. Then, we will play the game normally to increase our rating until we reach 25 rating or we are about to go over the 3-minute mark.
 
 **Who does what?**
 
